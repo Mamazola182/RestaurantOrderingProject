@@ -1,0 +1,100 @@
+﻿@using RestaurantOrderingProject.Utils
+@using RestaurantOrderingProject.Models
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    
+    var user = Context.Session.GetObject<User>("user");
+}
+<p style="color: red;">@((user != null) ? $"Logged in as: {user.Email}" : "Guest - not logged in")</p>
+
+<!-- Topbar Start -->
+<div class="container-fluid bg-dark py-3 px-lg-5 d-none d-lg-block">
+    <div class="row">
+        <div class="col-md-6 text-center text-lg-left mb-2 mb-lg-0">
+            <div class="d-inline-flex align-items-center">
+                <a class="text-body pr-3" href="#"><i class="fa fa-phone-alt mr-2"></i>+012 345 6789</a>
+                <span class="text-body">|</span>
+                <a class="text-body px-3" href="#"><i class="fa fa-envelope mr-2"></i>GiveMeStory@gmail.com</a>
+            </div>
+        </div>
+        <div class="col-md-6 text-center text-lg-right">
+            <div class="d-inline-flex align-items-center">
+                <a class="text-body px-3" href="#"><i class="fab fa-facebook-f"></i></a>
+                <a class="text-body px-3" href="#"><i class="fab fa-twitter"></i></a>
+                <a class="text-body px-3" href="#"><i class="fab fa-linkedin-in"></i></a>
+                <a class="text-body px-3" href="#"><i class="fab fa-instagram"></i></a>
+                <a class="text-body pl-3" href="#"><i class="fab fa-youtube"></i></a>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Topbar End -->
+<!-- Navbar Start -->
+<div class="container-fluid position-relative nav-bar p-0">
+    <div class="position-relative px-lg-5" style="z-index: 9;">
+        <nav class="navbar navbar-expand-lg bg-secondary navbar-dark py-3 py-lg-0 pl-3 pl-lg-5">
+            <a href="/customer/home" class="navbar-brand">
+                <img src="~/img/Rimberio-removebg.png" style="width: 200px; height: auto;" />
+            </a>
+            <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a asp-controller ="Home" asp-action="Index" class="nav-link active">Home</a></li>
+                    <li class="nav-item"><a asp-controller="Diary" asp-action="Index" class="nav-link">My Diary</a></li>
+                    
+                </ul>
+            </div>
+
+            @if (user != null)
+            {
+                <div class="ml-auto" id="user-menu">
+                    <div class="dropdown">
+                        <a href="#" class="btn btn-outline-primary dropdown-toggle" id="user-icon" data-toggle="dropdown">
+                            <i class="fa fa-user"></i>
+                        </a>
+                        <div class="dropdown-menu">
+                            
+                            <a href="#" id="logoutBtn" class="dropdown-item">Logout</a>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="ml-auto" id="guest-menu">
+               
+                    <a asp-controller="Authen" asp-action="Index" class="btn btn-outline-primary">Sign In</a>
+                </div>
+            }
+        </nav>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var logoutBtn = document.getElementById("logoutBtn");
+            if (logoutBtn) {
+                logoutBtn.addEventListener("click", function (e) {
+                    e.preventDefault();
+
+                    Swal.fire({
+                        title: "Are you sure?",
+                        text: "Do you want to logout?",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#d33",
+                        cancelButtonColor: "#3085d6",
+                        confirmButtonText: "Yes, Logout!"
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = "/Authen/logout";
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+</div>
+<!-- Navbar End -->
