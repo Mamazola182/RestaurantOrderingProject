@@ -5,9 +5,11 @@ namespace RestaurantOrderingProject.Models;
 
 public partial class Category
 {
-    public int CategoryId { get; set; }
+    public int Id { get; set; }
 
-    public string CategoryName { get; set; } = null!;
+    public string Name { get; set; } = null!;
 
-    public virtual ICollection<Food> Foods { get; set; } = new List<Food>();
+    public bool IsAvailable { get; set; }
+
+    public virtual ICollection<MenuItem> MenuItems { get; set; } = new List<MenuItem>();
 }

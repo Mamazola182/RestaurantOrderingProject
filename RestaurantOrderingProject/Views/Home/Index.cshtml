@@ -1,0 +1,101 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <title>Quét mã QR bàn ăn</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Thư viện quét QR -->
+    <script src="https://rawgit.com/schmich/instascan-builds/master/instascan.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(145deg, #e0f7fa, #fffde7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .scanner-wrapper {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            padding: 30px 20px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        h2 {
+            margin-bottom: 10px;
+            font-size: 1.5rem;
+            color: #333;
+        }
+
+        .instructions {
+            font-size: 1rem;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        #preview {
+            width: 100%;
+            max-width: 320px;
+            aspect-ratio: 1/1;
+            border: 4px solid #4caf50;
+            border-radius: 12px;
+            background: #f9f9f9;
+            margin-bottom: 15px;
+        }
+
+        .footer {
+            font-size: 0.9rem;
+            color: #999;
+            margin-top: 20px;
+        }
+
+        .error {
+            color: red;
+            margin-top: 10px;
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="scanner-wrapper">
+        <h2>Quét mã QR để gọi món</h2>
+        <div class="instructions">Hướng camera vào mã QR dán tại bàn.</div>
+        <video id="preview"></video>
+        <div id="error-message" class="error"></div>
+        <div class="footer">Cảm ơn quý khách đã ủng hộ nhà hàng!</div>
+    </div>
+
+    <script>
+        let scanner = new Instascan.Scanner({ video: document.getElementById('preview') });
+
+        scanner.addListener('scan', function (content) {
+            console.log("Scanned content:", content);
+            window.location.href = content; // chuyển trang ngay khi quét được
+        });
+
+        Instascan.Camera.getCameras().then(function (cameras) {
+            if (cameras.length > 0) {
+                let backCamera = cameras.find(c => c.name && c.name.toLowerCase().includes('back'));
+                scanner.start(backCamera || cameras[0]);
+            } else {
+                document.getElementById('error-message').innerText = "Không tìm thấy camera!";
+            }
+        }).catch(function (e) {
+            document.getElementById('error-message').innerText = "Lỗi truy cập camera: " + e;
+            console.error(e);
+        });
+    </script>
+</body>
+</html>

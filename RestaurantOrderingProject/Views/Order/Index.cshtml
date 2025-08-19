@@ -1,0 +1,767 @@
+﻿@model RestaurantOrderingProject.ViewModels.OrderViewModel
+@{
+    ViewData["Title"] = "Đặt món hải sản";
+    var tableId = Model?.TableId ?? 0;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="~/css/site.css" />
+    <style>
+        /* Style cho category sidebar */
+        .category-sidebar {
+            width: 250px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+        }
+
+            .category-sidebar h3 {
+                font-size: 1.5rem;
+                margin-bottom: 15px;
+                text-align: center;
+                color: #2c3e50;
+                font-weight: 700;
+                text-transform: uppercase;
+            }
+
+            .category-sidebar ul {
+                list-style: none;
+                padding: 0;
+                flex-grow: 1;
+                overflow-y: auto;
+            }
+
+            .category-sidebar li {
+                padding: 10px;
+                cursor: pointer;
+                border-bottom: 1px solid #eee;
+                transition: all 0.3s ease;
+                color: #34495e;
+            }
+
+                .category-sidebar li:hover {
+                    background-color: #ecf0f1;
+                    padding-left: 15px;
+                    color: #e74c3c;
+                }
+
+                .category-sidebar li:last-child {
+                    border-bottom: none;
+                }
+
+                .category-sidebar li.active {
+                    background-color: #3498db;
+                    color: white;
+                    font-weight: bold;
+                }
+
+        /* Style cho sort-control */
+        .sort-control {
+            background: linear-gradient(45deg, #2ecc71, #27ae60);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(46, 204, 113, 0.3);
+            transition: all 0.2s ease;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            opacity: 0.9;
+        }
+
+            .sort-control:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
+                opacity: 1;
+            }
+
+            .sort-control option {
+                background: #27ae60;
+                color: white;
+                padding: 5px;
+            }
+
+        /* Style cho logo với viền */
+        .logo {
+            border: 2px solid #e74c3c;
+            padding: 5px 10px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+            .logo:hover {
+                border-color: #3498db;
+                transform: scale(1.05);
+            }
+
+        /* Style cho nút trạng thái đơn hàng */
+        .order-status-btn {
+            background: linear-gradient(45deg, #8e44ad, #9b59b6);
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(142, 68, 173, 0.3);
+            transition: all 0.3s ease;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            opacity: 0.9;
+        }
+
+            .order-status-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(142, 68, 173, 0.4);
+                opacity: 1;
+            }
+
+        /* Style cho nút Mang về toàn bộ */
+        .takeaway-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .takeaway-checkbox {
+            cursor: pointer;
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Pagination styles */
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+            gap: 10px;
+        }
+
+        .pagination-btn {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+        }
+
+            .pagination-btn:hover:not(:disabled) {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+            }
+
+            .pagination-btn:disabled {
+                background: #bdc3c7;
+                cursor: not-allowed;
+                box-shadow: none;
+            }
+
+            .pagination-btn.active {
+                background: linear-gradient(45deg, #e74c3c, #c0392b);
+                box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+            }
+
+        .pagination-info {
+            color: #2c3e50;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin: 0 10px;
+        }
+
+        .page-number-btn {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+            margin: 0 2px;
+        }
+
+            .page-number-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+            }
+
+            .page-number-btn.active {
+                background: linear-gradient(45deg, #e74c3c, #c0392b);
+                box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+            }
+
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @@keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading overlay -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <div class="floating-elements">
+        <div class="floating-element" style="top: 10%; left: 10%; font-size: 2.8rem;">🍤</div>
+        <div class="floating-element" style="top: 20%; right: 15%; font-size: 2.3rem;">🦀</div>
+        <div class="floating-element" style="bottom: 30%; left: 20%; font-size: 1.8rem;">🐟</div>
+        <div class="floating-element" style="bottom: 20%; right: 10%; font-size: 2.8rem;">🦪</div>
+    </div>
+
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">🍤Phạm Lộc vua hải sản Việt Nam👑</div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <select class="sort-control" onchange="sortMenuItems(this.value)">
+                    <option value="default">Sắp xếp theo</option>
+                    <option value="price-asc">Giá: Thấp đến Cao</option>
+                    <option value="price-desc">Giá: Cao đến Thấp</option>
+                </select>
+                <div class="table-info">Bàn số @tableId</div>
+                <button class="order-status-btn" onclick="window.location.href='/Order/Status?tableId=@(Model?.TableId ?? 0)'">
+                    Trạng thái đơn hàng
+                </button>
+
+            </div>
+        </div>
+    </div>
+
+    <div style="display: flex; max-width: 1200px; margin: 0 auto; padding: 20px; gap: 20px;">
+        <!-- Sidebar trái: Danh sách category -->
+        <div class="category-sidebar">
+            <h3>Danh mục</h3>
+            <ul>
+                <li class="category-item active" data-category="all" onclick="filterByCategory('all')">Tất cả</li>
+                @foreach (var category in (Model.Categories?.Where(c => c.IsAvailable) ?? Enumerable.Empty<Category>()))
+                {
+                    <li class="category-item" data-category="@category.Id" onclick="filterByCategory(@category.Id)">
+                        @category.Name
+                    </li>
+                }
+            </ul>
+        </div>
+
+
+        <!-- Nội dung giữa: Thanh tìm kiếm và danh sách tất cả món -->
+        <div style="flex: 1;">
+            <!-- Thanh tìm kiếm -->
+            <div style="margin-bottom: 20px; text-align: center;">
+                <input type="text" id="search-input" placeholder="Tìm kiếm món ăn..." style="width: 100%; max-width: 600px; padding: 10px; border-radius: 20px; border: 1px solid #ddd; font-size: 1rem;" oninput="searchMenuItems(this.value)">
+            </div>
+
+            <!-- Danh sách tất cả món (sử dụng menu-list cho tất cả, hiển thị hết ban đầu) -->
+            <ul class="menu-list" id="menu-list">
+                @foreach (var item in Model.MenuItems.Where(m => m.IsAvailable && m.IsAvailable))
+                {
+                    <li class="menu-item" data-id="@item.Id" data-price="@item.Price" data-category="@item.CategoryId" data-name="@item.Name.ToLower()">
+                        @if (!string.IsNullOrEmpty(item.ImageUrl))
+                        {
+                            <img src="@item.ImageUrl" alt="@item.Name" onerror="this.src='/images/default-food.jpg';" />
+                        }
+                        else
+                        {
+                            <img src="/images/default-food.jpg" alt="Hình mặc định" />
+                        }
+                        <div class="menu-item-content">
+                            <div class="menu-item-name">@item.Name</div>
+                            <div class="menu-item-price">@item.Price.ToString("N0") VNĐ</div>
+                            <div class="menu-item-actions">
+                                <div class="quantity-controls">
+                                    <button class="quantity-btn" onclick="changeQuantity(@item.Id, -1)">-</button>
+                                    <span class="quantity-display" id="qty-@item.Id">0</span>
+                                    <button class="quantity-btn" onclick="changeQuantity(@item.Id, 1)">+</button>
+                                </div>
+                                <button class="add-to-cart-btn" onclick="addToCart(@item.Id, '@Html.Raw(Html.Encode(item.Name))', @item.Price)">
+                                    Thêm vào giỏ
+                                </button>
+                            </div>
+                        </div>
+                    </li>
+                }
+            </ul>
+
+            <!-- Pagination -->
+            <div class="pagination-container" id="pagination-container">
+                <button class="pagination-btn" id="prev-btn" onclick="changePage(currentPage - 1)">‹ Trước</button>
+                <div id="page-numbers"></div>
+                <button class="pagination-btn" id="next-btn" onclick="changePage(currentPage + 1)">Tiếp ›</button>
+            </div>
+
+            @if (!(Model?.MenuItems?.Any(m => m.IsAvailable && m.IsAvailable) ?? false))
+            {
+                <div class="no-data">
+                    🍽️ Không có dữ liệu menu để hiển thị.
+                </div>
+            }
+        </div>
+    </div>
+
+    <button class="cart-button" onclick="toggleCart()">
+        🛒
+        <span class="cart-count" id="cart-count">0</span>
+    </button>
+
+    <div class="cart-sidebar" id="cart-sidebar">
+        <div class="cart-header">
+            Giỏ hàng của bạn
+            <button class="close-cart" onclick="toggleCart()">×</button>
+        </div>
+        <div class="cart-items" id="cart-items">
+            <div class="empty-cart">Giỏ hàng trống</div>
+        </div>
+        <div class="cart-total">
+            <div style="font-size: 1.2rem; font-weight: 600; margin-bottom: 12px;">
+                Tổng cộng: <span id="cart-total">0</span> VNĐ
+            </div>
+            <div class="takeaway-toggle">
+                <input type="checkbox" id="takeaway-checkbox" class="takeaway-checkbox" onchange="toggleTakeaway()">
+                <label for="takeaway-checkbox">Mang về toàn bộ đơn hàng</label>
+            </div>
+            <div style="margin-bottom: 12px;">
+                <label for="cart-note" style="font-size: 1rem; font-weight: 600; display: block; margin-bottom: 5px;">Ghi chú cho đầu bếp:</label>
+                <textarea id="cart-note" placeholder="Viết ghi chú ở đây (tùy chọn)..." style="width: 100%; height: 60px; padding: 8px; border: 1px solid #dee2e6; border-radius: 4px; resize: none;"></textarea>
+            </div>
+            <button class="checkout-btn" onclick="checkout()">
+                Đặt hàng
+            </button>
+        </div>
+    </div>
+    <script>
+        const tableId = parseInt('@(Model?.TableId ?? 0)');
+    </script>
+    <script>
+        let cart = {};
+        let cartCount = 0;
+        let cartTotal = 0;
+        let cartNote = '';  // Biến để lưu ghi chú
+        let allMenuItems = []; // Lưu danh sách gốc của tất cả món
+        let isCartOpen = false; // Theo dõi trạng thái giỏ hàng
+        let isTakeaway = false; // Trạng thái mang về cho toàn bộ đơn hàng
+
+        // Pagination variables
+        let currentPage = 1;
+        let itemsPerPage = 9; // Changed to 9 items per page
+        let totalPages = 1;
+        let currentDisplayedItems = []; // Items currently being displayed (after filter/search)
+
+        // Store original menu items for each category
+        document.addEventListener('DOMContentLoaded', function() {
+            allMenuItems = Array.from(document.querySelectorAll('#menu-list .menu-item')).map(item => ({
+                element: item.cloneNode(true),
+                price: parseFloat(item.getAttribute('data-price')),
+                id: item.getAttribute('data-id'),
+                category: parseInt(item.getAttribute('data-category')),
+                name: item.getAttribute('data-name')
+            }));
+
+            // Initialize pagination
+            updateDisplayedItems();
+            updatePagination();
+
+            // Thêm class active cho category được chọn
+            const categoryItems = document.querySelectorAll('.category-item');
+            categoryItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    categoryItems.forEach(i => i.classList.remove('active'));
+                    this.classList.add('active');
+                    filterByCategory(this.getAttribute('data-category'));
+                });
+            });
+        });
+
+        function updateDisplayedItems() {
+            currentDisplayedItems = allMenuItems;
+
+            // Apply current filter/search
+            const searchInput = document.getElementById('search-input');
+            const searchText = searchInput ? searchInput.value.toLowerCase() : '';
+
+            if (searchText) {
+                currentDisplayedItems = currentDisplayedItems.filter(item => item.name.includes(searchText));
+            }
+
+            // Apply current category filter
+            const activeCategory = document.querySelector('.category-item.active');
+            if (activeCategory) {
+                const categoryId = activeCategory.getAttribute('data-category');
+                if (categoryId !== 'all') {
+                    currentDisplayedItems = currentDisplayedItems.filter(item => item.category === parseInt(categoryId));
+                }
+            }
+
+            // Apply current sort
+            const sortSelect = document.querySelector('.sort-control');
+            if (sortSelect) {
+                const sortType = sortSelect.value;
+                if (sortType === 'price-asc') {
+                    currentDisplayedItems.sort((a, b) => a.price - b.price);
+                } else if (sortType === 'price-desc') {
+                    currentDisplayedItems.sort((a, b) => b.price - a.price);
+                }
+            }
+
+            // Calculate total pages
+            totalPages = Math.ceil(currentDisplayedItems.length / itemsPerPage);
+            if (totalPages === 0) totalPages = 1;
+
+            // Ensure current page is valid
+            if (currentPage > totalPages) {
+                currentPage = totalPages;
+            }
+            if (currentPage < 1) {
+                currentPage = 1;
+            }
+
+            // Display current page items
+            displayCurrentPage();
+        }
+
+        function displayCurrentPage() {
+            const menuList = document.getElementById('menu-list');
+            menuList.innerHTML = '';
+
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const pageItems = currentDisplayedItems.slice(startIndex, endIndex);
+
+            pageItems.forEach(item => {
+                menuList.appendChild(item.element.cloneNode(true));
+            });
+        }
+
+        function updatePagination() {
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const pageNumbersDiv = document.getElementById('page-numbers');
+
+            // Update previous button
+            if (prevBtn) {
+                prevBtn.disabled = currentPage === 1;
+            }
+
+            // Update next button
+            if (nextBtn) {
+                nextBtn.disabled = currentPage === totalPages;
+            }
+
+            // Update page numbers
+            if (pageNumbersDiv) {
+                pageNumbersDiv.innerHTML = '';
+
+                // Create page number buttons
+                for (let i = 1; i <= totalPages; i++) {
+                    const pageBtn = document.createElement('button');
+                    pageBtn.className = 'page-number-btn' + (i === currentPage ? ' active' : '');
+                    pageBtn.textContent = i;
+                    pageBtn.onclick = () => changePage(i);
+                    pageNumbersDiv.appendChild(pageBtn);
+                }
+            }
+        }
+
+        function changePage(newPage) {
+            if (newPage < 1 || newPage > totalPages) return;
+
+            currentPage = newPage;
+            displayCurrentPage();
+            updatePagination();
+        }
+
+        function sortMenuItems(sortType) {
+            currentPage = 1; // Reset to first page when sorting
+            updateDisplayedItems();
+            updatePagination();
+        }
+
+        function changeQuantity(itemId, change) {
+            const qtyElement = document.getElementById('qty-' + itemId);
+            if (qtyElement) {
+                let currentQty = parseInt(qtyElement.textContent) || 0;
+                let newQty = Math.max(0, currentQty + change);
+                qtyElement.textContent = newQty;
+            }
+        }
+
+        function addToCart(itemId, itemName, itemPrice) {
+            const qtyElement = document.getElementById('qty-' + itemId);
+            if (!qtyElement) return;
+
+            const qty = parseInt(qtyElement.textContent) || 0;
+            if (qty === 0) {
+                alert('Vui lòng chọn số lượng trước khi thêm vào giỏ!');
+                return;
+            }
+
+            if (cart[itemId]) {
+                cart[itemId].quantity += qty;
+            } else {
+                cart[itemId] = {
+                    name: itemName,
+                    price: itemPrice,
+                    quantity: qty
+                };
+            }
+
+            updateCartDisplay();
+            qtyElement.textContent = '0';
+
+            const buttons = document.querySelectorAll('.add-to-cart-btn');
+            buttons.forEach(button => {
+                const onclickString = button.onclick.toString();
+                const regex = new RegExp(`addToCart\\(${itemId},`);
+                if (regex.test(onclickString)) {
+                    const originalText = button.textContent;
+                    button.textContent = '✓ Đã thêm!';
+                    button.style.background = 'linear-gradient(45deg, #2ecc71, #27ae60)';
+                    setTimeout(() => {
+                        button.textContent = originalText;
+                        button.style.background = 'linear-gradient(45deg, #00b894, #00cec9)';
+                    }, 1000);
+                }
+            });
+        }
+
+        function updateCartDisplay() {
+            cartCount = 0;
+            cartTotal = 0;
+
+            for (let itemId in cart) {
+                if (cart.hasOwnProperty(itemId)) {
+                    cartCount += cart[itemId].quantity;
+                    cartTotal += cart[itemId].price * cart[itemId].quantity;
+                }
+            }
+
+            const cartCountElement = document.getElementById('cart-count');
+            const cartTotalElement = document.getElementById('cart-total');
+
+            if (cartCountElement) cartCountElement.textContent = cartCount;
+            if (cartTotalElement) cartTotalElement.textContent = cartTotal.toLocaleString();
+
+            const cartItemsElement = document.getElementById('cart-items');
+            if (!cartItemsElement) return;
+
+            if (cartCount === 0) {
+                cartItemsElement.innerHTML = '<div class="empty-cart">Giỏ hàng trống</div>';
+            } else {
+                let cartHTML = '';
+                for (let itemId in cart) {
+                    if (cart.hasOwnProperty(itemId)) {
+                        const item = cart[itemId];
+                        cartHTML += '<div class="cart-item">';
+                        cartHTML += '<div class="cart-item-info">';
+                        cartHTML += '<div class="cart-item-name">' + item.name + '</div>';
+                        cartHTML += '<div class="cart-item-quantity">Số lượng: ' + item.quantity + '</div>';
+                        cartHTML += '</div>';
+                        cartHTML += '<div class="cart-item-actions">';
+                        cartHTML += '<div class="cart-item-price">' + (item.price * item.quantity).toLocaleString() + ' VNĐ</div>';
+                        cartHTML += '<button class="remove-btn" onclick="removeFromCart(\'' + itemId + '\'); event.stopPropagation();">Xóa</button>';
+                        cartHTML += '</div>';
+                        cartHTML += '</div>';
+                    }
+                }
+                cartItemsElement.innerHTML = cartHTML;
+            }
+
+            // Cập nhật checkbox mang về
+            const takeawayCheckbox = document.getElementById('takeaway-checkbox');
+            if (takeawayCheckbox) {
+                takeawayCheckbox.checked = isTakeaway;
+            }
+        }
+
+        function removeFromCart(itemId) {
+            delete cart[itemId];
+            updateCartDisplay();
+            // Không đóng giỏ hàng khi xóa
+        }
+
+        function toggleCart() {
+            const cartSidebar = document.getElementById('cart-sidebar');
+            if (cartSidebar) {
+                isCartOpen = !isCartOpen;
+                cartSidebar.classList.toggle('open');
+            }
+        }
+
+        function toggleTakeaway() {
+            isTakeaway = !isTakeaway;
+            // Không cần cập nhật display vì chỉ là toggle checkbox
+        }
+
+        function showLoading() {
+            const loadingOverlay = document.getElementById('loading-overlay');
+            if (loadingOverlay) {
+                loadingOverlay.style.display = 'flex';
+            }
+        }
+
+        function hideLoading() {
+            const loadingOverlay = document.getElementById('loading-overlay');
+            if (loadingOverlay) {
+                loadingOverlay.style.display = 'none';
+            }
+        }
+
+        // Hàm gửi đơn hàng về controller
+        async function submitOrder() {
+            if (cartCount === 0) {
+                alert('Giỏ hàng trống!');
+                return;
+            }
+
+            // Lấy ghi chú từ textarea
+            const noteElement = document.getElementById('cart-note');
+            cartNote = noteElement ? noteElement.value.trim() : '';
+
+            // Chuẩn bị dữ liệu để gửi
+            const orderData = {
+                TableId: @tableId,
+                Items: [],
+                Notes: cartNote,
+                IsTakeaway: isTakeaway,
+                TotalAmount: cartTotal,
+                Token: "@ViewBag.tokenQr"
+            };
+
+            // Chuyển đổi cart thành array của OrderItem
+            for (let itemId in cart) {
+                if (cart.hasOwnProperty(itemId)) {
+                    const item = cart[itemId];
+                    orderData.Items.push({
+                        MenuItemId: parseInt(itemId),
+                        Quantity: item.quantity,
+                        Price: item.price,
+                        ItemName: item.name
+                    });
+                }
+            }
+
+            try {
+                showLoading();
+
+                const response = await fetch('/Order/SubmitOrder', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        // 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                    },
+                    body: JSON.stringify(orderData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    alert('Đặt hàng thành công!\nMã đơn hàng: ' + result.orderId);
+
+                    // Reset giỏ hàng
+                    cart = {};
+                    isTakeaway = false;
+                    if (noteElement) noteElement.value = '';
+                    updateCartDisplay();
+                    toggleCart();
+
+                    // Có thể redirect đến trang order status
+                    if (result.redirectUrl) {
+                        window.location.href = result.redirectUrl;
+                    }
+                } else {
+                    alert('Có lỗi xảy ra khi đặt hàng: ' + (result.message || 'Lỗi không xác định'));
+                }
+            } catch (error) {
+                console.error('Error submitting order:', error);
+                alert('Có lỗi xảy ra khi gửi đơn hàng. Vui lòng thử lại.');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Thay đổi function checkout để gọi submitOrder
+        function checkout() {
+            submitOrder();
+        }
+
+        // Hàm lọc theo category, luôn reset từ danh sách gốc
+        function filterByCategory(categoryId) {
+            currentPage = 1; // Reset to first page when filtering
+            updateDisplayedItems();
+            updatePagination();
+            document.getElementById('search-input').value = '';
+        }
+
+        // Hàm tìm kiếm món ăn
+        function searchMenuItems(searchText) {
+            currentPage = 1; // Reset to first page when searching
+            updateDisplayedItems();
+            updatePagination();
+        }
+
+        // Khởi tạo: Load tất cả món khi trang mở
+        window.onload = function() {
+            filterByCategory('all');
+            sortMenuItems(document.querySelector('.sort-control').value);
+        };
+
+        document.addEventListener('click', function(event) {
+            const cartSidebar = document.getElementById('cart-sidebar');
+            const cartButton = document.querySelector('.cart-button');
+
+            if (cartSidebar && cartButton && !cartSidebar.contains(event.target) && !cartButton.contains(event.target) && isCartOpen) {
+                cartSidebar.classList.remove('open');
+                isCartOpen = false;
+            }
+        });
+    </script>
+</body>
+</html>

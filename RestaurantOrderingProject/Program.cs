@@ -1,42 +1,41 @@
 using Microsoft.EntityFrameworkCore;
 using RestaurantOrderingProject.Models;
 
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddDistributedMemoryCache(); // Backing store cho session (in-memory cho dev)
 builder.Services.AddSession(options =>
 {
-	options.IdleTimeout = TimeSpan.FromMinutes(30);
-	options.Cookie.HttpOnly = true;
-	options.Cookie.IsEssential = true;
+    options.IdleTimeout = TimeSpan.FromMinutes(30); // Th?i gian timeout session (tùy ch?nh)
+    options.Cookie.HttpOnly = true; // B?o m?t cookie
+    options.Cookie.IsEssential = true; // Cookie essential, không c?n consent
 });
+builder.Services.AddDbContext<RestaurantQrorderingContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DB")));
 
-builder.Services.AddDbContext<FoodOrderDbContext>(option => option.UseSqlServer(builder.Configuration.GetConnectionString("MyCnn")));
+// N?u b?n dùng authentication, thêm ? ?ây. Ví d?:
+// builder.Services.AddAuthentication(...);
 
 var app = builder.Build();
-
-app.UseSession();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
-	app.UseExceptionHandler("/Home/Error");
-	// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-	app.UseHsts();
+    app.UseExceptionHandler("/Home/Error");
 }
-
-app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthorization();
+app.UseAuthorization(); // B? n?u không dùng authentication
+
+app.UseSession(); // Ph?i sau UseRouting
 
 app.MapControllerRoute(
-	name: "default",
-	pattern: "{controller=Authen}/{action=Index}/{id?}");
+    name: "default",
+    pattern: "{controller=Qr}/{action=GenerateList}/{id?}"); // ??i t? GenerateList thành Index
 
 app.Run();

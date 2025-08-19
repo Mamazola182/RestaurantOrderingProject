@@ -1,0 +1,405 @@
+﻿@model RestaurantOrderingProject.Models.Category
+
+<style>
+    .delete-container {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        padding: 40px;
+        max-width: 450px;
+        margin: 50px auto;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        animation: slideIn 0.6s ease-out;
+    }
+
+        .delete-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3);
+            animation: slideBar 2s ease-in-out infinite;
+        }
+
+    @@keyframes slideIn {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(-30px) scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    }
+
+    @@keyframes slideBar {
+        0%
+
+    {
+        left: -100%;
+    }
+
+    50% {
+        left: 100%;
+    }
+
+    100% {
+        left: 100%;
+    }
+
+    }
+
+    .warning-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 20px;
+        background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: pulse 2s ease-in-out infinite;
+        box-shadow: 0 10px 30px rgba(255, 107, 107, 0.3);
+    }
+
+    @@keyframes pulse {
+        0%, 100%
+
+    {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+
+    }
+
+    .warning-icon::before {
+        content: '⚠️';
+        font-size: 32px;
+    }
+
+    .delete-container h2 {
+        color: #2c3e50;
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 20px;
+        opacity: 0;
+        animation: fadeInUp 0.6s ease-out 0.2s forwards;
+    }
+
+    @@keyframes fadeInUp {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+
+    .warning-text {
+        color: #555;
+        font-size: 18px;
+        line-height: 1.6;
+        margin-bottom: 30px;
+        opacity: 0;
+        animation: fadeInUp 0.6s ease-out 0.4s forwards;
+    }
+
+    .category-name {
+        color: #e74c3c;
+        font-weight: 700;
+        background: rgba(231, 76, 60, 0.1);
+        padding: 8px 16px;
+        border-radius: 25px;
+        display: inline-block;
+        margin: 0 5px;
+        animation: highlight 2s ease-in-out infinite;
+    }
+
+    @@keyframes highlight {
+        0%, 100%
+
+    {
+        background: rgba(231, 76, 60, 0.1);
+    }
+
+    50% {
+        background: rgba(231, 76, 60, 0.2);
+    }
+
+    }
+
+    .form-container {
+        opacity: 0;
+        animation: fadeInUp 0.6s ease-out 0.6s forwards;
+    }
+
+    .button-group {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin-top: 20px;
+    }
+
+    .btn {
+        padding: 15px 30px;
+        border: none;
+        border-radius: 50px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        text-decoration: none;
+        display: inline-block;
+        min-width: 120px;
+    }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transition: all 0.6s ease;
+            transform: translate(-50%, -50%);
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+    .btn-delete {
+        background: linear-gradient(135deg, #e74c3c, #c0392b);
+        color: white;
+        box-shadow: 0 8px 25px rgba(231, 76, 60, 0.3);
+    }
+
+        .btn-delete:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(231, 76, 60, 0.4);
+        }
+
+        .btn-delete:active {
+            transform: translateY(-1px);
+        }
+
+    .btn-cancel {
+        background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+        color: white;
+        box-shadow: 0 8px 25px rgba(149, 165, 166, 0.3);
+    }
+
+        .btn-cancel:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(149, 165, 166, 0.4);
+        }
+
+    .floating-particles {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        pointer-events: none;
+    }
+
+    .particle {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.7);
+        border-radius: 50%;
+        animation: float 6s ease-in-out infinite;
+    }
+
+        .particle:nth-child(1) {
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .particle:nth-child(2) {
+            left: 20%;
+            animation-delay: 1s;
+        }
+
+        .particle:nth-child(3) {
+            left: 30%;
+            animation-delay: 2s;
+        }
+
+        .particle:nth-child(4) {
+            left: 40%;
+            animation-delay: 3s;
+        }
+
+        .particle:nth-child(5) {
+            left: 50%;
+            animation-delay: 4s;
+        }
+
+        .particle:nth-child(6) {
+            left: 60%;
+            animation-delay: 5s;
+        }
+
+        .particle:nth-child(7) {
+            left: 70%;
+            animation-delay: 0.5s;
+        }
+
+        .particle:nth-child(8) {
+            left: 80%;
+            animation-delay: 1.5s;
+        }
+
+        .particle:nth-child(9) {
+            left: 90%;
+            animation-delay: 2.5s;
+        }
+
+    @@keyframes float {
+        0%, 100%
+
+    {
+        transform: translateY(0px) rotate(0deg);
+        opacity: 0;
+    }
+
+    10% {
+        opacity: 1;
+    }
+
+    90% {
+        opacity: 1;
+    }
+
+    50% {
+        transform: translateY(-20px) rotate(180deg);
+    }
+
+    }
+
+    @@keyframes shake {
+        0%, 100%
+
+    {
+        transform: translateX(0) translateY(-3px);
+    }
+
+    25% {
+        transform: translateX(-5px) translateY(-3px);
+    }
+
+    75% {
+        transform: translateX(5px) translateY(-3px);
+    }
+
+    }
+
+    @@media (max-width: 480px) {
+        .delete-container
+
+    {
+        padding: 30px 20px;
+        margin: 20px 10px;
+    }
+
+    .button-group {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .btn {
+        width: 100%;
+    }
+
+    .delete-container h2 {
+        font-size: 24px;
+    }
+
+    .warning-text {
+        font-size: 16px;
+    }
+
+    }
+
+    /* Background cho toàn trang */
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        min-height: 100vh;
+    }
+</style>
+
+<div class="delete-container">
+    <div class="floating-particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <div class="warning-icon"></div>
+
+    <h2>Xóa Danh Mục</h2>
+
+    <div class="warning-text">
+        Bạn chắc chắn xóa <span class="category-name">"@Model.Name"</span>?
+    </div>
+
+    <div class="form-container">
+        <form asp-action="Delete">
+            <input type="hidden" asp-for="Id" />
+            <div class="button-group">
+                <button type="submit" class="btn btn-delete" id="deleteBtn">
+                    <span>🗑️ Xóa</span>
+                </button>
+                <a href="javascript:history.back()" class="btn btn-cancel">
+                    <span>↩️ Hủy</span>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Thêm hiệu ứng shake khi hover vào nút xóa
+        const deleteBtn = document.getElementById('deleteBtn');
+
+        deleteBtn.addEventListener('mouseenter', function() {
+            this.style.animation = 'shake 0.5s ease-in-out';
+        });
+
+        deleteBtn.addEventListener('animationend', function() {
+            this.style.animation = '';
+        });
+    });
+</script>
