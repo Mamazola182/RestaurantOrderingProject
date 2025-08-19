@@ -5,21 +5,23 @@ namespace RestaurantOrderingProject.Models;
 
 public partial class Order
 {
-    public int Id { get; set; }
+    public int OrderId { get; set; }
 
-    public int TableId { get; set; }
+    public int? UserId { get; set; }
 
-    public DateTime? OrderTime { get; set; }
+    public DateTime? OrderDate { get; set; }
+
+    public string? DeliveryAddress { get; set; }
+
+    public decimal? TotalAmount { get; set; }
 
     public string? Status { get; set; }
 
-    public string? Note { get; set; }
+    public string? PaymentMethod { get; set; }
 
-    public decimal? TotalMoney { get; set; }
+    public string? PaymentStatus { get; set; }
 
-    public bool? IsTakeAway { get; set; }
+    public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
 
-    public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
-
-    public virtual Table Table { get; set; } = null!;
+    public virtual User? User { get; set; }
 }
