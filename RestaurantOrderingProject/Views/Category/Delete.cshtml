@@ -1,0 +1,34 @@
+﻿@model RestaurantOrderingProject.Models.Category
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    ViewData["Title"] = "Delete";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-3 text-danger">⚠️ Delete Category</h2>
+
+    <div class="alert alert-warning">
+        <strong>Warning:</strong> Are you sure you want to delete this category? <br />
+        <span class="fw-bold text-danger">This action will also permanently delete all foods under this category!</span>
+    </div>
+
+    <div class="card shadow-sm p-3 mb-3">
+        <h5 class="card-title">Category Info</h5>
+        <hr />
+        <dl class="row mb-0">
+            <dt class="col-sm-3 text-muted">
+                @Html.DisplayNameFor(model => model.CategoryName)
+            </dt>
+            <dd class="col-sm-9 fw-bold">
+                @Html.DisplayFor(model => model.CategoryName)
+            </dd>
+        </dl>
+    </div>
+
+    <form asp-action="Delete" class="d-flex gap-2">
+        <input type="hidden" asp-for="CategoryId" />
+        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+        <a asp-action="Index" class="btn btn-secondary btn-sm">Back to List</a>
+    </form>
+</div>

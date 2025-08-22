@@ -1,0 +1,28 @@
+﻿@model RestaurantOrderingProject.Models.Category
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4 text-primary">✏️ Edit Category</h2>
+
+    <div class="card shadow-sm p-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            <input type="hidden" asp-for="CategoryId" />
+
+            <div class="mb-3">
+                <label asp-for="CategoryName" class="form-label fw-bold"></label>
+                <input asp-for="CategoryName" class="form-control" placeholder="Enter category name..." />
+                <span asp-validation-for="CategoryName" class="text-danger"></span>
+            </div>
+
+            <div class="d-flex gap-2">
+                <input type="submit" value="Save" class="btn btn-primary btn-sm" />
+                <a asp-action="Index" class="btn btn-secondary btn-sm">Back to List</a>
+            </div>
+        </form>
+    </div>
+</div>
