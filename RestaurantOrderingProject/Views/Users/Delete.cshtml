@@ -1,0 +1,26 @@
+﻿@model RestaurantOrderingProject.Models.User
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    ViewData["Title"] = "Delete";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+<div class="container mt-4">
+    <h2>Delete User</h2>
+
+    @if (TempData["DeleteError"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["DeleteError"]
+        </div>
+    }
+
+    <div class="alert alert-warning mt-3">
+        Bạn có chắc muốn xóa user <b>@Model.FullName</b>?
+    </div>
+
+    <form asp-controller="Users" asp-action="Delete" method="post">
+        <input type="hidden" asp-for="UserId" />
+        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+        <a asp-controller="Users" asp-action="Index" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>

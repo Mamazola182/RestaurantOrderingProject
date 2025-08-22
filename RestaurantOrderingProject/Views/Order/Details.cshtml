@@ -1,0 +1,45 @@
+﻿@model RestaurantOrderingProject.Models.Order
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    ViewData["Title"] = "Details";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<h2>Order Details</h2>
+
+<div>
+    <h4>Order Info</h4>
+    <p><strong>Order Id:</strong> @Model.OrderId</p>
+    <p><strong>User:</strong> @Model.User?.FullName</p>
+    <p><strong>Order Date:</strong> @(Model.OrderDate?.ToString("yyyy-MM-dd HH:mm"))</p>
+    <p><strong>Total Amount:</strong> @Model.TotalAmount</p>
+    <p><strong>Status:</strong> @Model.Status</p>
+</div>
+
+<hr />
+
+<h4>Items</h4>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Food</th>
+            <th>Quantity</th>
+            <th>Price</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var d in Model.OrderDetails)
+    {
+        <tr>
+            <td>@d.Food?.Name</td>
+            <td>@d.Quantity</td>
+            <td>@d.Price</td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+<a asp-controller="Order" asp-action="Delete" asp-route-id="@Model.OrderId"
+   class="btn btn-danger">Delete</a>
+<a asp-action="Index" class="btn btn-secondary">Back to List</a>
+

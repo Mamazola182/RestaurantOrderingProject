@@ -1,0 +1,32 @@
+﻿@model RestaurantOrderingProject.Models.User
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    ViewData["Title"] = "Details";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+<div class="container mt-4">
+    <h2>User Details</h2>
+
+    <dl class="row mt-3">
+        <dt class="col-sm-3">Name</dt>
+        <dd class="col-sm-9">@Model.FullName</dd>
+
+        <dt class="col-sm-3">Email</dt>
+        <dd class="col-sm-9">@Model.Email</dd>
+
+        <dt class="col-sm-3">Phone</dt>
+        <dd class="col-sm-9">@Model.Phone</dd>
+
+        <dt class="col-sm-3">Role</dt>
+        <dd class="col-sm-9">@Model.Role</dd>
+
+        <dt class="col-sm-3">Created</dt>
+        <dd class="col-sm-9">@Model.CreatedAt</dd>
+    </dl>
+
+    <div class="btn-group mt-3">
+        <a asp-controller="Users" asp-action="Edit" asp-route-id="@Model.UserId" class="btn btn-warning">Edit</a>
+        <a asp-controller="Users" asp-action="Delete" asp-route-id="@Model.UserId" class="btn btn-danger">Delete</a>
+        <a asp-controller="Order" asp-action="Index" asp-route-searchString="@Model.FullName" class="btn btn-info">Xem đơn hàng</a>
+    </div>
+</div>
