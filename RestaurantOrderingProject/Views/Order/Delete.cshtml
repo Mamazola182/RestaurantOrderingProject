@@ -1,0 +1,20 @@
+﻿@model RestaurantOrderingProject.Models.Order
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    ViewData["Title"] = "Delete Order";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container mt-4">
+    <h2>Delete Order</h2>
+
+    <div class="alert alert-warning mt-3">
+        Bạn có chắc muốn xóa đơn hàng <b>@Model.OrderId</b> của user <b>@Model.User?.FullName</b>?
+    </div>
+
+    <form asp-controller="Order" asp-action="Delete" method="post">
+        <input type="hidden" asp-for="OrderId" />
+        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+        <a asp-controller="Order" asp-action="Index" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>

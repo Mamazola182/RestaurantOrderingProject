@@ -1,0 +1,94 @@
+﻿@model IEnumerable<RestaurantOrderingProject.Models.Order>
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<h2 class="mb-4">Order List</h2>
+
+<div class="card p-3 mb-4 shadow-sm">
+    <form method="get" asp-action="Index">
+        <div class="row g-2 align-items-center">
+            <!-- Search -->
+            <div class="col-md-4">
+                <input type="text" name="searchString" value="@ViewBag.SearchString"
+                       class="form-control" placeholder="🔍 Search by user name" />
+            </div>
+
+            <div class="col-md-3">
+                <select name="statusFilter" class="form-select"> <option value="">--All Status--</option> <option value="Pending" selected="@(ViewBag.StatusFilter == "Pending")">Pending</option> <option value="Processing" selected="@(ViewBag.StatusFilter == "Processing")">Processing</option> <option value="Delivering" selected="@(ViewBag.StatusFilter == "Delivering")">Delivering</option> <option value="Completed" selected="@(ViewBag.StatusFilter == "Completed")">Completed</option> <option value="Cancelled" selected="@(ViewBag.StatusFilter == "Cancelled")">Cancelled</option> </select>
+            </div>
+
+            <!-- Buttons -->
+            <div class="col-md-5 text-end">
+                <button type="submit" class="btn btn-primary me-2">
+                    Search
+                </button>
+                <button type="submit" formaction="@Url.Action("ExportExcel", "Order")"
+                        formmethod="post" class="btn btn-success">
+                    Export to Excel
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<table class="table table-striped align-middle shadow-sm">
+    <thead class="table-light">
+        <tr>
+            <th>
+                <form method="get" asp-action="Index" style="display:inline;">
+                    <input type="hidden" name="sortOrder" value="@ViewData["DateSortParm"]" />
+                    <button type="submit" class="btn btn-link p-0">Order Date ⬍</button>
+                </form>
+            </th>
+            <th>User</th>
+            <th>
+                <form method="get" asp-action="Index" style="display:inline;">
+                    <input type="hidden" name="sortOrder" value="@ViewData["AmountSortParm"]" />
+                    <button type="submit" class="btn btn-link p-0">Total Amount ⬍</button>
+                </form>
+            </th>
+            <th>Status</th>
+            <th class="text-center">Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@(item.OrderDate?.ToString("yyyy-MM-dd"))</td>
+                <td>@item.User?.FullName</td>
+                <td>@item.TotalAmount</td>
+                <td>@item.Status</td>
+                <td class="text-center">
+                    <a asp-controller="Order" asp-action="Details" asp-route-id="@item.OrderId"
+                       class="btn btn-info btn-sm">Details</a>
+                    <a asp-controller="Order" asp-action="Delete" asp-route-id="@item.OrderId"
+                       class="btn btn-danger btn-sm">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Pagination -->
+<div class="d-flex justify-content-center mt-4">
+    <nav aria-label="Page navigation">
+        <ul class="pagination">
+            @for (int i = 1; i <= ViewBag.TotalPages; i++)
+            {
+                <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                    <form method="get" asp-action="Index" asp-controller="Order" style="display:inline;">
+                        <input type="hidden" name="page" value="@i" />
+                        <input type="hidden" name="searchString" value="@ViewBag.SearchString" />
+                        <input type="hidden" name="statusFilter" value="@ViewBag.StatusFilter" />
+                        <input type="hidden" name="sortOrder" value="@ViewBag.SortOrder" />
+                        <button type="submit" class="page-link">@i</button>
+                    </form>
+                </li>
+            }
+        </ul>
+    </nav>
+</div>
