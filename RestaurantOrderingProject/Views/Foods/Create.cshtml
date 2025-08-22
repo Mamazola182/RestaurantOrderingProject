@@ -1,0 +1,136 @@
+﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@model RestaurantOrderingProject.Models.Food
+
+@{
+    ViewData["Title"] = "Create New Food";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
+
+<h1>Create New Food</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" placeholder="Enter food name" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Description" class="control-label"></label>
+                <textarea asp-for="Description" class="form-control" rows="3" placeholder="Enter food description"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Price" class="control-label"></label>
+                <div class="input-group">
+                    <span class="input-group-text">₫</span>
+                    <input asp-for="Price" class="form-control" placeholder="0" />
+                </div>
+                <span asp-validation-for="Price" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="ImageUrl" class="control-label">Image URL</label>
+                <input asp-for="ImageUrl" class="form-control" placeholder="https://example.com/image.jpg" />
+                <span asp-validation-for="ImageUrl" class="text-danger"></span>
+                <small class="form-text text-muted">Enter the URL of the food image</small>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="CategoryId" class="control-label">Category</label>
+                <select asp-for="CategoryId" class="form-select">
+                    <option value="">-- Select Category --</option>
+                    @if (ViewBag.Categories != null)
+                    {
+                        @foreach (var category in ViewBag.Categories)
+                        {
+                            <option value="@category.CategoryId">@category.CategoryName</option>
+                        }
+                    }
+                </select>
+                <span asp-validation-for="CategoryId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <div class="form-check">
+                    <input class="form-check-input" asp-for="IsAvailable" type="checkbox" checked />
+                    <label class="form-check-label" asp-for="IsAvailable">
+                        Available for order
+                    </label>
+                </div>
+                <span asp-validation-for="IsAvailable" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Preview</h5>
+            </div>
+            <div class="card-body">
+                <div id="imagePreview" style="display: none;">
+                    <img id="previewImg" src="" alt="Preview" class="img-fluid rounded mb-2" style="max-height: 200px;" />
+                </div>
+                <h6 id="previewName" class="text-muted">Food name will appear here</h6>
+                <p id="previewDescription" class="text-muted small">Description will appear here</p>
+                <p id="previewPrice" class="text-success fw-bold">Price will appear here</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Preview functionality
+    document.addEventListener('DOMContentLoaded', function () {
+        const nameInput = document.getElementById('Name');
+        const descInput = document.getElementById('Description');
+        const priceInput = document.getElementById('Price');
+        const imageInput = document.getElementById('ImageUrl');
+
+        const previewName = document.getElementById('previewName');
+        const previewDesc = document.getElementById('previewDescription');
+        const previewPrice = document.getElementById('previewPrice');
+        const previewImg = document.getElementById('previewImg');
+        const imagePreview = document.getElementById('imagePreview');
+
+        function updatePreview() {
+            previewName.textContent = nameInput.value || 'Food name will appear here';
+            previewDesc.textContent = descInput.value || 'Description will appear here';
+
+            if (priceInput.value) {
+                const price = parseFloat(priceInput.value);
+                previewPrice.textContent = price.toLocaleString('vi-VN') + ' ₫';
+            } else {
+                previewPrice.textContent = 'Price will appear here';
+            }
+
+            if (imageInput.value) {
+                previewImg.src = imageInput.value;
+                imagePreview.style.display = 'block';
+            } else {
+                imagePreview.style.display = 'none';
+            }
+        }
+
+        nameInput.addEventListener('input', updatePreview);
+        descInput.addEventListener('input', updatePreview);
+        priceInput.addEventListener('input', updatePreview);
+        imageInput.addEventListener('input', updatePreview);
+    });
+</script>
+
