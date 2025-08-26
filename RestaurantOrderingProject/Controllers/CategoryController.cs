@@ -138,13 +138,19 @@ namespace RestaurantOrderingProject.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var category = await _context.Categories.FindAsync(id);
+            var category = await _context.Categories
+                .Include(c => c.Foods)
+                .FirstOrDefaultAsync(c => c.CategoryId == id);
+
             if (category != null)
             {
+                _context.Foods.RemoveRange(category.Foods);
+
                 _context.Categories.Remove(category);
+
+                await _context.SaveChangesAsync();
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
