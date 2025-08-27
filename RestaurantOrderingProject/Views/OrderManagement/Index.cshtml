@@ -368,7 +368,12 @@
         <h1>🍽️ Quản Lý Đơn Hàng</h1>
     </div>
 
-    <div class="table-container">
+    <div class="table-container" id="orderListContainer">
+        <div style="text-align: right; padding: 20px;">
+            <form asp-action="ExportToExcel" method="get">
+                <button type="submit" class="btn btn-complete">📤 Xuất Excel</button>
+            </form>
+        </div>
         <table class="table">
             <thead>
                 <tr>
@@ -382,96 +387,17 @@
                     <th>Chi Tiết</th>
                 </tr>
             </thead>
-            <tbody>
-                @foreach (var order in Model)
-                {
-                    <tr>
-                        <td><span class="table-id">@order.TableId</span></td>
-                        <td>@order.OrderTime</td>
-                        <td>
-                            @if (order.Status == "Pending")
-                            {
-                                <span class="status-badge status-pending">Chờ xử lý</span>
-                            }
-                            else if (order.Status == "Accepted")
-                            {
-                                <span class="status-badge status-accepted">Đã chấp nhận</span>
-                            }
-                            else if (order.Status == "Completed")
-                            {
-                                <span class="status-badge status-completed">Hoàn thành</span>
-                            }
-                            else if (order.Status == "Rejected")
-                            {
-                                <span class="status-badge status-rejected">Đã từ chối</span>
-                            }
-                        </td>
-                        <td><span class="money">@((order.TotalMoney as decimal?)?.ToString("C")) VND</span></td>
-                        <td>@(string.IsNullOrEmpty(order.Note) ? "Không có" : order.Note)</td>
-                        <td>
-                            @if (order.IsTakeAway.GetValueOrDefault())
-                            {
-                                <span style="color: var(--success-color); font-weight: 600;">✓ Có</span>
-                            }
-                            else
-                            {
-                                <span style="color: var(--danger-color); font-weight: 600;">✗ Không</span>
-                            }
-                        </td>
-                        <td>
-                            @if (order.Status == "Pending")
-                            {
-                                <form asp-action="Accept" asp-route-id="@order.Id" method="post" style="display:inline;">
-                                    <button type="submit" class="btn btn-accept">✓ Chấp Nhận</button>
-                                </form>
-                                <form asp-action="Reject" asp-route-id="@order.Id" method="post" style="display:inline;">
-                                    <button type="submit" class="btn btn-reject">✗ Từ Chối</button>
-                                </form>
-                            }
-                            else if (order.Status == "Accepted")
-                            {
-                                <form asp-action="Complete" asp-route-id="@order.Id" method="post" style="display:inline;">
-                                    <button type="submit" class="btn btn-complete">🏆 Hoàn Thành</button>
-                                </form>
-                            }
-                            else if (order.Status == "Completed" || order.Status == "Rejected")
-                            {
-                                <span class="no-edit">Không thể chỉnh sửa</span>
-                            }
-                        </td>
-                        <td>
-                            <button onclick="toggleDetails(@order.Id)" class="btn btn-details">👁️ Chi Tiết</button>
-                            <div id="details-@order.Id" style="display:none;" class="details-container">
-                                <ul class="order-items">
-                                    @foreach (var item in order.OrderItems)
-                                    {
-                                        <li class="order-item">
-                                            <div class="item-info">
-                                                <strong>@item.Quantity x @item.UnitPrice.ToString("N0") VND</strong> - @item.MenuItem.Name
-                                            </div>
-                                            <div class="item-actions">
-                                                @if (order.Status != "Completed" && order.Status != "Rejected" && (string.IsNullOrEmpty(item.Status) || item.Status != "Rejected"))
-                                                {
-                                                    <button onclick="showRejectItemForm(@item.Id)" class="btn btn-item-reject">Từ Chối Item</button>
-                                                    <div id="reject-item-form-@item.Id" style="display:none;" class="reject-form">
-                                                        <form asp-action="RejectItem" asp-route-itemId="@item.Id" method="post">
-                                                            <input type="text" name="rejectionReason" placeholder="Nhập lý do từ chối item..." required />
-                                                            <button type="submit" class="btn btn-reject">Xác Nhận Từ Chối</button>
-                                                        </form>
-                                                    </div>
-                                                }
-                                            </div>
-                                        </li>
-                                    }
-                                </ul>
-                            </div>
-                        </td>
-                    </tr>
-                }
+            <tbody id="orderListBody">
+                @await Html.PartialAsync("_OrderList", Model)
             </tbody>
+
         </table>
     </div>
 </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 
 <script>
     function toggleDetails(id) {
@@ -483,4 +409,38 @@
         var form = document.getElementById('reject-item-form-' + itemId);
         form.style.display = 'block';
     }
+
+
+
+
+</script>
+
+<script>
+    
+    const connection = new signalR.HubConnectionBuilder()
+    .withUrl("/orderHub")
+    .build();
+
+    connection.start()
+        .then(() => console.log("✅ SignalR connected"))
+        .catch(err => console.error("SignalR error:", err));
+
+    connection.on("DataChange", () => {
+        console.log("📦 Đơn hàng thay đổi, đang cập nhật lại danh sách...");
+    loadOrderList();
+    });
+
+    function loadOrderList() {
+        $.ajax({
+            url: '/OrderManagement/LoadOrderListPartial',
+            type: 'GET',
+            success: function (html) {
+                $('#orderListBody').html(html); // chỉ cập nhật phần tbody
+            },
+            error: function () {
+                console.error("❌ Không thể tải danh sách đơn hàng.");
+            }
+        });
+    }
+
 </script>

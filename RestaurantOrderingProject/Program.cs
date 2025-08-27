@@ -1,8 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using RestaurantOrderingProject.Models;
+using SignalR.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.Services.AddSignalR();
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpContextAccessor();
@@ -18,6 +19,7 @@ builder.Services.AddDbContext<RestaurantQrorderingContext>(options =>
 
 // N?u b?n dùng authentication, thêm ? ?ây. Ví d?:
 // builder.Services.AddAuthentication(...);
+builder.Services.AddDbContext<RestaurantQrorderingContext>(option => option.UseSqlServer(builder.Configuration.GetConnectionString("MyCnn")));
 
 var app = builder.Build();
 
@@ -33,7 +35,7 @@ app.UseRouting();
 app.UseAuthorization(); // B? n?u không dùng authentication
 
 app.UseSession(); // Ph?i sau UseRouting
-
+app.MapHub<ChatHub>("/orderHub");
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Qr}/{action=GenerateList}/{id?}"); // ??i t? GenerateList thành Index

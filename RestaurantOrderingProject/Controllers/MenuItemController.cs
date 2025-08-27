@@ -4,17 +4,14 @@ using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.SignalR;
+using SignalR.Hubs;
 
 namespace RestaurantOrderingProject.Controllers
 {
-    public class MenuItemController : Controller
+    public class MenuItemController(RestaurantQrorderingContext _context, IHubContext<ChatHub> hubContext) : Controller
     {
-        private readonly RestaurantQrorderingContext _context;
-
-        public MenuItemController(RestaurantQrorderingContext context)
-        {
-            _context = context;
-        }
+        
 
         private bool IsAuthenticated()
         {
@@ -64,6 +61,7 @@ namespace RestaurantOrderingProject.Controllers
                         _context.Add(menuItem);
                         await _context.SaveChangesAsync();
                         TempData["Success"] = "Thêm món ăn thành công!"; // Thông báo thành công
+                        await hubContext.Clients.All.SendAsync("DataChanged");
                         return RedirectToAction(nameof(Index));
                     }
                     catch (Exception ex)
@@ -103,7 +101,7 @@ namespace RestaurantOrderingProject.Controllers
 
             _context.MenuItems.Update(item);
             await _context.SaveChangesAsync();
-
+            await hubContext.Clients.All.SendAsync("DataChanged");
             TempData["Success"] = "Trạng thái món ăn đã được cập nhật.";
             return RedirectToAction(nameof(Index));
         }
@@ -144,6 +142,7 @@ namespace RestaurantOrderingProject.Controllers
                         _context.Update(menuItem);
                         await _context.SaveChangesAsync();
                         TempData["Success"] = "Sửa món ăn thành công!";
+                        await hubContext.Clients.All.SendAsync("DataChanged");
                         return RedirectToAction(nameof(Index));
                     }
                 }
@@ -169,5 +168,12 @@ namespace RestaurantOrderingProject.Controllers
         }
 
         // Các action khác giữ nguyên...
+
+        public async Task<IActionResult> LoadMenuListPartial()
+        {
+            var items = await _context.MenuItems.Include(m => m.Category).ToListAsync();
+            return PartialView("_MenuList", items);
+        }
+
     }
 }

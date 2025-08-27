@@ -574,44 +574,42 @@
             <a class="btn btn-primary mb-3" href="@Url.Action("Create")">➕ Thêm Món Ăn Mới</a>
         </div>
 
-        <div class="table-container">
-            <table class="table table-bordered table-striped">
-                <thead class="thead-dark">
-                    <tr>
-                        <th>🍽️ Tên</th>
-                        <th>💰 Giá</th>
-                        <th>📂 Danh Mục</th>
-                        <th>📊 Trạng Thái</th>
-                        <th>⚙️ Hành Động</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model)
-                    {
-                        <tr>
-                            <td class="name-cell">@item.Name</td>
-                            <td class="price-cell">@item.Price.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</td>
-                            <td class="category-cell">@item.Category?.Name</td>
-                            <td>
-                                <span class="badge @(item.IsAvailable ? "badge-success" : "badge-secondary")">
-                                    @(item.IsAvailable ? "Có Sẵn" : "Không Có Sẵn")
-                                </span>
-                            </td>
-                            <td>
-                                <div class="action-buttons">
-                                    <a class="btn btn-sm btn-warning" href="@Url.Action("Edit", new { id = item.Id })">✏️ Sửa</a>
-                                    <form asp-action="ToggleAvailable" asp-route-id="@item.Id" method="post" style="display:inline;">
-                                        @Html.AntiForgeryToken()
-                                        <button type="submit" class="btn btn-sm btn-info" onclick="return confirm('Bạn có chắc muốn thay đổi trạng thái món này?')">
-                                            🔄 Đổi Trạng Thái
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+        <div id="menuTableContainer" class="table-container">
+            @await Html.PartialAsync("_MenuList", Model)
         </div>
     </div>
 </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/orderHub")
+        .build();
+
+    connection.on("DataChanged", function () {
+        console.log("🔄 Món ăn cập nhật, đang reload...");
+        loadMenuTable();
+    });
+
+    connection.start()
+        .then(() => {
+            console.log("✅ Đã kết nối MenuHub");
+        })
+        .catch(err => console.error(err));
+
+    function loadMenuTable() {
+        $.ajax({
+            url: "/MenuItem/LoadMenuListPartial",
+            method: "GET",
+            success: function (html) {
+                $("#menuTableContainer").html(html);
+            },
+            error: function (xhr) {
+                console.error("❌ Lỗi khi tải danh sách:", xhr);
+            }
+        });
+    }
+</script>
+
