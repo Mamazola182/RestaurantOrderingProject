@@ -1,20 +1,16 @@
 ﻿using System.Text;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using RestaurantOrderingProject.Models;
 using RestaurantOrderingProject.ViewModels;
+using SignalR.Hubs;
 
 namespace RestaurantOrderingProject.Controllers
 {
-    public class OrderController : Controller
+    public class OrderController(RestaurantQrorderingContext _context, IHubContext<ChatHub> hubContext) : Controller
     {
-        private readonly RestaurantQrorderingContext _context;
-
-        public OrderController(RestaurantQrorderingContext context)
-        {
-            _context = context;
-        }
-
+        
         public IActionResult Index(string token)
         {
             if (string.IsNullOrEmpty(token))
@@ -146,7 +142,7 @@ namespace RestaurantOrderingProject.Controllers
 
                 _context.OrderItems.AddRange(orderItems);
                 await _context.SaveChangesAsync();
-
+                await hubContext.Clients.All.SendAsync("DataChange");
                 // 7. Commit transaction
                 await transaction.CommitAsync();
 
